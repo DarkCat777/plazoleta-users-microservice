@@ -47,11 +47,11 @@ dependencies {
 }
 
 jacoco {
-    toolVersion = "0.8.11" // Usa la versión más reciente estable
+    toolVersion = "0.8.13"
 }
 
 test {
-    useJUnitPlatform() // si estás usando JUnit 5
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 

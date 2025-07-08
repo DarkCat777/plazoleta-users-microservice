@@ -56,6 +56,8 @@ class UserControllerTest {
     @MockitoBean
     private UserMapper userMapper;
 
+    private final String BASE_URL = "/api/v1/users";
+
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -82,7 +84,7 @@ class UserControllerTest {
         when(userMapper.toResponse(user)).thenReturn(userResponse);
 
         // When / Then
-        mockMvc.perform(post("/api/v1/users/owner")
+        mockMvc.perform(post(BASE_URL + "/owner")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isCreated())
@@ -103,7 +105,7 @@ class UserControllerTest {
                 .thenThrow(new UserAlreadyExistsException("john@example.com"));
 
         // When / Then
-        mockMvc.perform(post("/api/v1/users/owner")
+        mockMvc.perform(post(BASE_URL + "/owner")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isConflict())
@@ -127,7 +129,7 @@ class UserControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/v1/users/owner")
+        mockMvc.perform(post(BASE_URL + "/owner")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andExpect(status().isBadRequest())
@@ -147,7 +149,7 @@ class UserControllerTest {
 
         when(createOwnerUseCase.createOwner(command)).thenThrow(new UnderageUserException());
 
-        mockMvc.perform(post("/api/v1/users/owner")
+        mockMvc.perform(post(BASE_URL + "owner")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isBadRequest())
@@ -167,7 +169,7 @@ class UserControllerTest {
         when(createOwnerUseCase.createOwner(command))
                 .thenThrow(new RoleNotFoundException("OWNER"));
 
-        mockMvc.perform(post("/api/v1/users/owner")
+        mockMvc.perform(post(BASE_URL + "/owner")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isNotFound())
@@ -195,7 +197,7 @@ class UserControllerTest {
         when(userMapper.toResponse(user)).thenReturn(response);
 
         // When / Then
-        mockMvc.perform(get("/api/v1/users/{id}", userId))
+        mockMvc.perform(get(BASE_URL + "/{id}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("jane@example.com"))
                 .andExpect(jsonPath("$.role.name").value("ADMINISTRATOR"));
@@ -209,7 +211,7 @@ class UserControllerTest {
         when(findUserByIdUseCase.getById(userId)).thenThrow(new UserNotFoundException(userId));
 
         // When / Then
-        mockMvc.perform(get("/api/v1/users/{id}", userId))
+        mockMvc.perform(get(BASE_URL + "/{id}", userId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Usuario no encontrado"))
                 .andExpect(jsonPath("$.message").value("Usuario no encontrado con el id: " + userId));

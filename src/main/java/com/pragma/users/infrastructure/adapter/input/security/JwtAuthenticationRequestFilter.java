@@ -26,7 +26,7 @@ import java.io.IOException;
 public class JwtAuthenticationRequestFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
-    private final TokenProviderPort tokerProvider;
+    private final TokenProviderPort tokenProvider;
 
     private String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -51,7 +51,7 @@ public class JwtAuthenticationRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        DecodedJWT decodedToken = tokerProvider.validateToken(token);
+        DecodedJWT decodedToken = tokenProvider.validateToken(token);
 
         if (decodedToken == null || decodedToken.getSubject() == null || decodedToken.getSubject().isBlank()) {
             log.error("Invalid token: {}", token);

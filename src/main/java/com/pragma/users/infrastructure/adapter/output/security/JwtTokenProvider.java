@@ -43,6 +43,7 @@ public class JwtTokenProvider implements TokenProviderPort {
                 .withIssuer(issuer)
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(jwtTokenValidity))
+                .withClaim("id", user.getId())
                 .withClaim("roles", List.of("ROLE_" + user.getRole().getName().name()))
                 .sign(this.hmac512);
     }
