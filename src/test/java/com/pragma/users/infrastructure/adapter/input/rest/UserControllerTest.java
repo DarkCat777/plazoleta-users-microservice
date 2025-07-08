@@ -1,0 +1,218 @@
+package com.pragma.users.infrastructure.adapter.input.rest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pragma.users.application.dto.CreateOwnerCommand;
+import com.pragma.users.application.exception.RoleNotFoundException;
+import com.pragma.users.application.exception.UnderageUserException;
+import com.pragma.users.application.exception.UserAlreadyExistsException;
+import com.pragma.users.application.exception.UserNotFoundException;
+import com.pragma.users.application.port.input.CreateOwnerUseCase;
+import com.pragma.users.application.port.input.FindUserByIdUseCase;
+import com.pragma.users.config.TestSecurityConfig;
+import com.pragma.users.domain.model.User;
+import com.pragma.users.infrastructure.adapter.input.dto.RoleResponse;
+import com.pragma.users.infrastructure.adapter.input.dto.UserResponse;
+import com.pragma.users.infrastructure.adapter.input.rest.handler.GlobalExceptionHandler;
+import com.pragma.users.infrastructure.adapter.input.security.JwtAuthenticationRequestFilter;
+import com.pragma.users.infrastructure.adapter.mapper.UserMapper;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
+@WebMvcTest(controllers = UserController.class, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationRequestFilter.class)
+})
+@Import({GlobalExceptionHandler.class, TestSecurityConfig.class})
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private CreateOwnerUseCase createOwnerUseCase;
+
+    @MockitoBean
+    private FindUserByIdUseCase findUserByIdUseCase;
+
+    @MockitoBean
+    private UserMapper userMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    void shouldCreateOwnerSuccessfully() throws Exception {
+        // Given
+        CreateOwnerCommand command = new CreateOwnerCommand("John", "Doe", "12345678", "987654321",
+                LocalDate.of(2000, 1, 1), "john@example.com", "password");
+
+        User user = User.builder()
+                .id(1L)
+                .firstname("John")
+                .lastname("Doe")
+                .email("john@example.com")
+                .phoneNumber("987654321")
+                .build();
+
+        RoleResponse roleResponse = new RoleResponse(2L, "OWNER", "Owner role");
+        UserResponse userResponse = new UserResponse(1L, "John", "Doe", "john@example.com", "987654321", roleResponse);
+
+        when(createOwnerUseCase.createOwner(command)).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+
+        // When / Then
+        mockMvc.perform(post("/api/v1/users/owner")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.firstname").value("John"))
+                .andExpect(jsonPath("$.role.name").value("OWNER"))
+                .andExpect(jsonPath("$.role.description").value("Owner role"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    void shouldReturn409WhenOwnerAlreadyExists() throws Exception {
+        // Given
+        CreateOwnerCommand command = new CreateOwnerCommand("John", "Doe", "12345678", "987654321",
+                LocalDate.of(2000, 1, 1), "john@example.com", "password");
+
+        when(createOwnerUseCase.createOwner(command))
+                .thenThrow(new UserAlreadyExistsException("john@example.com"));
+
+        // When / Then
+        mockMvc.perform(post("/api/v1/users/owner")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Usuario ya existe"))
+                .andExpect(jsonPath("$.message").value("Ya existe un usuario registrado con el correo: " + command.getEmail()));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    void shouldReturn400WhenValidationFails() throws Exception {
+        // firstname vacío y email inválido
+        String invalidJson = """
+                {
+                  "firstname": "",
+                  "lastname": "Doe",
+                  "identityDocument": "12345678",
+                  "phoneNumber": "987654321",
+                  "birthdate": "2000-01-01",
+                  "email": "correo-no-valido",
+                  "password": "password"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/users/owner")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Datos inválidos"))
+                .andExpect(jsonPath("$.message").value(Matchers.containsString("firstname")))
+                .andExpect(jsonPath("$.message").value(Matchers.containsString("email")));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    void shouldReturn400WhenUserIsUnderage() throws Exception {
+        CreateOwnerCommand command = new CreateOwnerCommand(
+                "Young", "User", "12345678", "987654321",
+                LocalDate.now().minusYears(16), // menor de edad
+                "young@example.com", "password"
+        );
+
+        when(createOwnerUseCase.createOwner(command)).thenThrow(new UnderageUserException());
+
+        mockMvc.perform(post("/api/v1/users/owner")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Usuario menor de edad"))
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    void shouldReturn404WhenRoleNotFound() throws Exception {
+        CreateOwnerCommand command = new CreateOwnerCommand(
+                "John", "Doe", "12345678", "987654321",
+                LocalDate.of(2000, 1, 1),
+                "john@example.com", "password"
+        );
+
+        when(createOwnerUseCase.createOwner(command))
+                .thenThrow(new RoleNotFoundException("OWNER"));
+
+        mockMvc.perform(post("/api/v1/users/owner")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Rol no encontrado"))
+                .andExpect(jsonPath("$.message").value("No existe el rol: OWNER"));
+    }
+
+    @Test
+    @WithMockUser
+    void shouldReturnUserByIdSuccessfully() throws Exception {
+        // Given
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .firstname("Jane")
+                .lastname("Doe")
+                .email("jane@example.com")
+                .phoneNumber("123456789")
+                .build();
+
+        RoleResponse roleResponse = new RoleResponse(1L, "ADMINISTRATOR", "Admin role");
+        UserResponse response = new UserResponse(userId, "Jane", "Doe", "jane@example.com", "123456789", roleResponse);
+
+        when(findUserByIdUseCase.getById(userId)).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(response);
+
+        // When / Then
+        mockMvc.perform(get("/api/v1/users/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("jane@example.com"))
+                .andExpect(jsonPath("$.role.name").value("ADMINISTRATOR"));
+    }
+
+    @Test
+    @WithMockUser
+    void shouldReturn404WhenUserNotFound() throws Exception {
+        // Given
+        Long userId = 99L;
+        when(findUserByIdUseCase.getById(userId)).thenThrow(new UserNotFoundException(userId));
+
+        // When / Then
+        mockMvc.perform(get("/api/v1/users/{id}", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Usuario no encontrado"))
+                .andExpect(jsonPath("$.message").value("Usuario no encontrado con el id: " + userId));
+    }
+}
+

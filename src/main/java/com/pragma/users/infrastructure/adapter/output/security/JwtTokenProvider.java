@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Component
 @Log4j2
@@ -42,7 +43,7 @@ public class JwtTokenProvider implements TokenProviderPort {
                 .withIssuer(issuer)
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(jwtTokenValidity))
-                .withClaim("role", user.getRole().getName().name())
+                .withClaim("roles", List.of("ROLE_" + user.getRole().getName().name()))
                 .sign(this.hmac512);
     }
 

@@ -9,9 +9,9 @@ MERGE INTO roles (id, nombre, descripcion) VALUES
 MERGE INTO usuarios (
     id, nombre, apellido, numero_documento, celular,
     fecha_nacimiento, correo, clave, id_role
-) VALUES (
+    ) VALUES (
     1, 'Admin', 'Principal', '00000000', '999999999',
     '1990-01-01', 'admin@pragma.com',
     '$2a$12$f5v6nYeKzgiKjrxwx2xYf.LDHb7Hihe/uRJFlGyOwwvYEQkHShDv6', -- "adminPassword123"
     1
-);
+    );

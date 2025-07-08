@@ -3,7 +3,6 @@ package com.pragma.users.infrastructure.adapter.output.persistence;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.domain.port.output.UserRepository;
 import com.pragma.users.infrastructure.adapter.mapper.UserMapper;
-import com.pragma.users.infrastructure.adapter.output.model.JpaUserEntity;
 import com.pragma.users.infrastructure.adapter.output.repository.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,8 +18,7 @@ public class UserRepositoryAdapter implements UserRepository {
 
     @Override
     public User save(User user) {
-        JpaUserEntity userEntity = jpaUserRepository.save(userMapper.toEntity(user));
-        return userMapper.toDomain(userEntity);
+        return userMapper.toDomain(jpaUserRepository.save(userMapper.toEntity(user)));
     }
 
     @Override
@@ -31,5 +29,10 @@ public class UserRepositoryAdapter implements UserRepository {
     @Override
     public boolean existsByEmail(String email) {
         return jpaUserRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return jpaUserRepository.findById(id).map(userMapper::toDomain);
     }
 }
