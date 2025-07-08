@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@OpenAPIDefinition(info = @Info(title = "San Felipe Dental Care", version = "1.0"))
+@OpenAPIDefinition(info = @Info(title = "Users Microservice", version = "1.0"))
 @SecurityScheme(
         name = "Bearer Auth",
         type = SecuritySchemeType.HTTP,
