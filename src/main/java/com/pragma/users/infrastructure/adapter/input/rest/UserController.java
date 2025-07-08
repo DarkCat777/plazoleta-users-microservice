@@ -2,7 +2,7 @@ package com.pragma.users.infrastructure.adapter.input.rest;
 
 import com.pragma.users.application.dto.CreateOwnerCommand;
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.input.CreateOwnerUseCase;
+import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.infrastructure.adapter.input.dto.UserResponse;
 import com.pragma.users.infrastructure.adapter.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,7 +1,7 @@
 package com.pragma.users.infrastructure.config;
 
 import com.pragma.users.application.service.CreateOwnerService;
-import com.pragma.users.domain.port.input.CreateOwnerUseCase;
+import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
 import com.pragma.users.domain.port.output.RoleRepository;
 import com.pragma.users.domain.port.output.UserRepository;

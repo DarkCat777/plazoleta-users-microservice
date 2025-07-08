@@ -1,4 +1,4 @@
-package com.pragma.users.domain.port.input;
+package com.pragma.users.application.port.input;
 
 
 import com.pragma.users.application.dto.CreateOwnerCommand;

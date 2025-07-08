@@ -7,7 +7,7 @@ import com.pragma.users.application.exception.UserAlreadyExistsException;
 import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.input.CreateOwnerUseCase;
+import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
 import com.pragma.users.domain.port.output.RoleRepository;
 import com.pragma.users.domain.port.output.UserRepository;
