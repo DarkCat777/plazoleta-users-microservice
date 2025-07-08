@@ -12,7 +12,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none  # crea tablas desde las entidades y las borra al terminar
+      ddl-auto: update  # crea tablas desde las entidades y las borra al terminar
     defer-datasource-initialization: true  # permite ejecutar data.sql aun con create?drop
   sql:
     init:
