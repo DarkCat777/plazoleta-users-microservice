@@ -4,7 +4,7 @@ import com.pragma.users.application.exception.RoleNotFoundException;
 import com.pragma.users.application.exception.UnderageUserException;
 import com.pragma.users.application.exception.UserAlreadyExistsException;
 import com.pragma.users.application.exception.UserNotFoundException;
-import com.pragma.users.infrastructure.adapter.input.dto.ErrorResponse;
+import com.pragma.users.infrastructure.adapter.input.rest.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

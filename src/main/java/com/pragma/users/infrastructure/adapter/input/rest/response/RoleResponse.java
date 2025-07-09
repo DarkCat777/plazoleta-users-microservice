@@ -1,4 +1,4 @@
-package com.pragma.users.infrastructure.adapter.input.dto;
+package com.pragma.users.infrastructure.adapter.input.rest.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.pragma.users.infrastructure.adapter.mapper;
 
 import com.pragma.users.domain.model.User;
-import com.pragma.users.infrastructure.adapter.input.dto.UserResponse;
+import com.pragma.users.infrastructure.adapter.input.rest.response.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 

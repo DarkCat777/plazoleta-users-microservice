@@ -4,8 +4,8 @@ import com.pragma.users.application.dto.CreateOwnerCommand;
 import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.application.port.input.FindUserByIdUseCase;
 import com.pragma.users.domain.model.User;
-import com.pragma.users.infrastructure.adapter.input.dto.ErrorResponse;
-import com.pragma.users.infrastructure.adapter.input.dto.UserResponse;
+import com.pragma.users.infrastructure.adapter.input.rest.response.ErrorResponse;
+import com.pragma.users.infrastructure.adapter.input.rest.response.UserResponse;
 import com.pragma.users.infrastructure.adapter.mapper.UserResponseMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,9 +25,24 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final CreateOwnerUseCase createOwnerUseCase;
     private final FindUserByIdUseCase findUserByIdUseCase;
+    private final CreateOwnerUseCase createOwnerUseCase;
     private final UserResponseMapper userMapper;
+
+    @Operation(summary = "Find user by Id")
+    @SecurityRequirement(name = "Bearer Auth")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Error interno",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        User user = findUserByIdUseCase.getById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(userMapper.toResponse(user));
+    }
 
     @Operation(summary = "Create owner user")
     @SecurityRequirement(name = "Bearer Auth")
@@ -44,18 +59,4 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
     }
 
-    @Operation(summary = "Find user by Id")
-    @SecurityRequirement(name = "Bearer Auth")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User found"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "500", description = "Error interno",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        User user = findUserByIdUseCase.getById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(userMapper.toResponse(user));
-    }
 }

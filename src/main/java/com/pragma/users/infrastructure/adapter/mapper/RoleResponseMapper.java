@@ -1,7 +1,7 @@
 package com.pragma.users.infrastructure.adapter.mapper;
 
 import com.pragma.users.domain.model.Role;
-import com.pragma.users.infrastructure.adapter.input.dto.RoleResponse;
+import com.pragma.users.infrastructure.adapter.input.rest.response.RoleResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 

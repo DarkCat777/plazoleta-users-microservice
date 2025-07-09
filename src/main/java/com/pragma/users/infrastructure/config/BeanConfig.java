@@ -1,8 +1,10 @@
 package com.pragma.users.infrastructure.config;
 
 import com.pragma.users.application.port.input.CreateOwnerUseCase;
+import com.pragma.users.application.port.input.FindUserByEmailUseCase;
 import com.pragma.users.application.port.input.FindUserByIdUseCase;
 import com.pragma.users.application.service.CreateOwnerUseCaseImpl;
+import com.pragma.users.application.service.FindUserByEmailUseCaseImpl;
 import com.pragma.users.application.service.FindUserByIdUseCaseImpl;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
 import com.pragma.users.domain.port.output.RoleRepositoryPort;
@@ -31,5 +33,10 @@ public class BeanConfig {
     @Bean
     public FindUserByIdUseCase findUserByIdUseCase(UserRepositoryPort userRepositoryPort) {
         return new FindUserByIdUseCaseImpl(userRepositoryPort);
+    }
+
+    @Bean
+    public FindUserByEmailUseCase findUserByEmailUseCase(UserRepositoryPort userRepositoryPort) {
+        return new FindUserByEmailUseCaseImpl(userRepositoryPort);
     }
 }
