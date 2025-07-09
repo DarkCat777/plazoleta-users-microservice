@@ -1,6 +1,8 @@
 package com.pragma.users.infrastructure.adapter.input.rest;
 
+import com.pragma.users.application.dto.CreateEmployeeCommand;
 import com.pragma.users.application.dto.CreateOwnerCommand;
+import com.pragma.users.application.port.input.CreateEmployeeUseCase;
 import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.application.port.input.FindUserByIdUseCase;
 import com.pragma.users.domain.model.User;
@@ -27,6 +29,7 @@ public class UserController {
 
     private final FindUserByIdUseCase findUserByIdUseCase;
     private final CreateOwnerUseCase createOwnerUseCase;
+    private final CreateEmployeeUseCase createEmployeeUseCase;
     private final UserResponseMapper userMapper;
 
     @Operation(summary = "Find user by Id")
@@ -59,4 +62,18 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
     }
 
+    @Operation(summary = "Create employee user")
+    @SecurityRequirement(name = "Bearer Auth")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Employee created", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Employee already exists", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PreAuthorize("hasRole('OWNER')")
+    @PostMapping("/employee")
+    public ResponseEntity<UserResponse> createEmployee(@Validated @RequestBody CreateEmployeeCommand request) {
+        User user = createEmployeeUseCase.createEmployee(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
+    }
 }

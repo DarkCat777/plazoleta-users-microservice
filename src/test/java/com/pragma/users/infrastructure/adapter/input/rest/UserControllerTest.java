@@ -3,11 +3,13 @@ package com.pragma.users.infrastructure.adapter.input.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pragma.users.application.dto.CreateEmployeeCommand;
 import com.pragma.users.application.dto.CreateOwnerCommand;
 import com.pragma.users.application.exception.RoleNotFoundException;
 import com.pragma.users.application.exception.UnderageUserException;
 import com.pragma.users.application.exception.UserAlreadyExistsException;
 import com.pragma.users.application.exception.UserNotFoundException;
+import com.pragma.users.application.port.input.CreateEmployeeUseCase;
 import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.application.port.input.FindUserByIdUseCase;
 import com.pragma.users.config.TestSecurityConfig;
@@ -49,6 +51,9 @@ class UserControllerTest {
 
     @MockitoBean
     private CreateOwnerUseCase createOwnerUseCase;
+
+    @MockitoBean
+    private CreateEmployeeUseCase createEmployeeUseCase;
 
     @MockitoBean
     private FindUserByIdUseCase findUserByIdUseCase;
@@ -216,5 +221,53 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.error").value("Usuario no encontrado"))
                 .andExpect(jsonPath("$.message").value("Usuario no encontrado con el id: " + userId));
     }
-}
 
+    @Test
+    @WithMockUser(roles = "OWNER")
+    void shouldCreateEmployeeSuccessfully() throws Exception {
+        // Given
+        CreateEmployeeCommand command = new CreateEmployeeCommand("Jane", "Smith", "87654321", "123456789",
+                LocalDate.of(1995, 5, 15), "jane@example.com", "securePass");
+
+        User user = User.builder()
+                .id(2L)
+                .firstname("Jane")
+                .lastname("Smith")
+                .email("jane@example.com")
+                .phoneNumber("123456789")
+                .build();
+
+        RoleResponse roleResponse = new RoleResponse(3L, "EMPLOYEE", "Empleado del sistema");
+        UserResponse userResponse = new UserResponse(2L, "Jane", "Smith", "jane@example.com", "123456789", "87654321", LocalDate.of(1995, 5, 15), roleResponse);
+
+        when(createEmployeeUseCase.createEmployee(command)).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+
+        // When / Then
+        mockMvc.perform(post(BASE_URL + "/employee")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.firstname").value("Jane"))
+                .andExpect(jsonPath("$.role.name").value("EMPLOYEE"));
+    }
+
+    @Test
+    @WithMockUser(roles = "OWNER")
+    void shouldReturn409WhenEmployeeAlreadyExists() throws Exception {
+        CreateEmployeeCommand command = new CreateEmployeeCommand("Jane", "Smith", "87654321", "123456789",
+                LocalDate.of(1995, 5, 15), "jane@example.com", "securePass");
+
+        when(createEmployeeUseCase.createEmployee(command))
+                .thenThrow(new UserAlreadyExistsException(command.getEmail()));
+
+        mockMvc.perform(post(BASE_URL + "/employee")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Usuario ya existe"))
+                .andExpect(jsonPath("$.message").value("Ya existe un usuario registrado con el correo: " + command.getEmail()));
+
+    }
+}
