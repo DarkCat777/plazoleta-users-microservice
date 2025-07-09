@@ -1,13 +1,7 @@
 package com.pragma.users.infrastructure.config;
 
-import com.pragma.users.application.port.input.CreateEmployeeUseCase;
-import com.pragma.users.application.port.input.CreateOwnerUseCase;
-import com.pragma.users.application.port.input.FindUserByEmailUseCase;
-import com.pragma.users.application.port.input.FindUserByIdUseCase;
-import com.pragma.users.application.service.CreateEmployeeUseCaseImpl;
-import com.pragma.users.application.service.CreateOwnerUseCaseImpl;
-import com.pragma.users.application.service.FindUserByEmailUseCaseImpl;
-import com.pragma.users.application.service.FindUserByIdUseCaseImpl;
+import com.pragma.users.application.port.input.*;
+import com.pragma.users.application.service.*;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
 import com.pragma.users.domain.port.output.RoleRepositoryPort;
 import com.pragma.users.domain.port.output.UserRepositoryPort;
@@ -39,6 +33,15 @@ public class BeanConfig {
             EncryptPasswordPort encryptPasswordPort
     ) {
         return new CreateEmployeeUseCaseImpl(userRepositoryPort, roleRepositoryPort, encryptPasswordPort);
+    }
+
+    @Bean
+    public CreateCustomerUseCase createCustomerUseCase(
+            UserRepositoryPort userRepositoryPort,
+            RoleRepositoryPort roleRepositoryPort,
+            EncryptPasswordPort encryptPasswordPort
+    ) {
+        return new CreateCustomerUseCaseImpl(userRepositoryPort, roleRepositoryPort, encryptPasswordPort);
     }
 
     @Bean

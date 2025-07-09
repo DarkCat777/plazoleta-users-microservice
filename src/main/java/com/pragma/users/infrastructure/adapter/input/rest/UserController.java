@@ -1,7 +1,9 @@
 package com.pragma.users.infrastructure.adapter.input.rest;
 
+import com.pragma.users.application.dto.CreateCustomerCommand;
 import com.pragma.users.application.dto.CreateEmployeeCommand;
 import com.pragma.users.application.dto.CreateOwnerCommand;
+import com.pragma.users.application.port.input.CreateCustomerUseCase;
 import com.pragma.users.application.port.input.CreateEmployeeUseCase;
 import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.application.port.input.FindUserByIdUseCase;
@@ -30,6 +32,7 @@ public class UserController {
     private final FindUserByIdUseCase findUserByIdUseCase;
     private final CreateOwnerUseCase createOwnerUseCase;
     private final CreateEmployeeUseCase createEmployeeUseCase;
+    private final CreateCustomerUseCase createCustomerUseCase;
     private final UserResponseMapper userMapper;
 
     @Operation(summary = "Find user by Id")
@@ -74,6 +77,21 @@ public class UserController {
     @PostMapping("/employee")
     public ResponseEntity<UserResponse> createEmployee(@Validated @RequestBody CreateEmployeeCommand request) {
         User user = createEmployeeUseCase.createEmployee(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
+    }
+
+    @Operation(summary = "Create customer user")
+    @SecurityRequirement(name = "Bearer Auth")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Customer created", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Customer already exists", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PreAuthorize("hasRole('OWNER')")
+    @PostMapping("/customer")
+    public ResponseEntity<UserResponse> createCustomer(@Validated @RequestBody CreateCustomerCommand request) {
+        User user = createCustomerUseCase.createCustomer(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
     }
 }
