@@ -81,14 +81,12 @@ public class UserController {
     }
 
     @Operation(summary = "Create customer user")
-    @SecurityRequirement(name = "Bearer Auth")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Customer created", content = @Content),
             @ApiResponse(responseCode = "409", description = "Customer already exists", content = @Content),
             @ApiResponse(responseCode = "500", description = "Error interno",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/customer")
     public ResponseEntity<UserResponse> createCustomer(@Validated @RequestBody CreateCustomerCommand request) {
         User user = createCustomerUseCase.createCustomer(request);

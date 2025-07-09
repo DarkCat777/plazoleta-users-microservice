@@ -33,7 +33,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/authenticate",
+                                "/api/v1/authenticate", // Log in with username and password
+                                "/api/v1/users/customer", // Create client accounts
                                 "/actuator/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"

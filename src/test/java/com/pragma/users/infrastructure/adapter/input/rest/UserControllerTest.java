@@ -313,7 +313,6 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "OWNER")
     void shouldReturn409WhenCustomerAlreadyExists() throws Exception {
         CreateCustomerCommand command = new CreateCustomerCommand(
                 "Maria", "Lopez", "99999999", "900000000",
@@ -332,7 +331,6 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "OWNER")
     void shouldReturn404WhenCustomerRoleNotFound() throws Exception {
         CreateCustomerCommand command = new CreateCustomerCommand(
                 "Esteban", "Rojas", "88888888", "922222222",
