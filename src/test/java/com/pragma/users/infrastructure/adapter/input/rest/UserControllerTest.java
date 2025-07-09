@@ -16,7 +16,7 @@ import com.pragma.users.infrastructure.adapter.input.dto.RoleResponse;
 import com.pragma.users.infrastructure.adapter.input.dto.UserResponse;
 import com.pragma.users.infrastructure.adapter.input.rest.handler.GlobalExceptionHandler;
 import com.pragma.users.infrastructure.adapter.input.security.JwtAuthenticationRequestFilter;
-import com.pragma.users.infrastructure.adapter.mapper.UserMapper;
+import com.pragma.users.infrastructure.adapter.mapper.UserResponseMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ class UserControllerTest {
     private FindUserByIdUseCase findUserByIdUseCase;
 
     @MockitoBean
-    private UserMapper userMapper;
+    private UserResponseMapper userMapper;
 
     private final String BASE_URL = "/api/v1/users";
 
@@ -78,7 +78,7 @@ class UserControllerTest {
                 .build();
 
         RoleResponse roleResponse = new RoleResponse(2L, "OWNER", "Owner role");
-        UserResponse userResponse = new UserResponse(1L, "John", "Doe", "john@example.com", "987654321", roleResponse);
+        UserResponse userResponse = new UserResponse(1L, "John", "Doe", "john@example.com", "987654321", "73108217", LocalDate.now(), roleResponse);
 
         when(createOwnerUseCase.createOwner(command)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(userResponse);
@@ -149,7 +149,7 @@ class UserControllerTest {
 
         when(createOwnerUseCase.createOwner(command)).thenThrow(new UnderageUserException());
 
-        mockMvc.perform(post(BASE_URL + "owner")
+        mockMvc.perform(post(BASE_URL + "/owner")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isBadRequest())
@@ -191,7 +191,7 @@ class UserControllerTest {
                 .build();
 
         RoleResponse roleResponse = new RoleResponse(1L, "ADMINISTRATOR", "Admin role");
-        UserResponse response = new UserResponse(userId, "Jane", "Doe", "jane@example.com", "123456789", roleResponse);
+        UserResponse response = new UserResponse(userId, "Jane", "Doe", "jane@example.com", "123456789", "73108217", LocalDate.now(), roleResponse);
 
         when(findUserByIdUseCase.getById(userId)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(response);

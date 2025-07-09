@@ -1,11 +1,9 @@
 package com.pragma.users.infrastructure.adapter.mapper;
 
-
-public interface BaseMapper<D, E, R> {
+public interface BaseEntityMapper<D, E> {
 
     D toDomain(E entity);
 
     E toEntity(D domain);
 
-    R toResponse(D domain);
 }

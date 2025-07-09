@@ -5,6 +5,6 @@ import com.pragma.users.domain.model.RoleName;
 
 import java.util.Optional;
 
-public interface RoleRepository {
+public interface RoleRepositoryPort {
     Optional<Role> findByName(RoleName roleName);
 }

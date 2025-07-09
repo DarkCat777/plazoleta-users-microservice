@@ -1,8 +1,8 @@
 package com.pragma.users.infrastructure.adapter.output.persistence;
 
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.output.UserRepository;
-import com.pragma.users.infrastructure.adapter.mapper.UserMapper;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
+import com.pragma.users.infrastructure.adapter.mapper.UserEntityMapper;
 import com.pragma.users.infrastructure.adapter.output.repository.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,10 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class UserRepositoryAdapter implements UserRepository {
+public class UserRepositoryAdapter implements UserRepositoryPort {
 
     private final JpaUserRepository jpaUserRepository;
-    private final UserMapper userMapper;
+    private final UserEntityMapper userMapper;
 
     @Override
     public User save(User user) {

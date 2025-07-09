@@ -3,7 +3,7 @@ package com.pragma.users.infrastructure.adapter.output.security;
 import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.output.UserRepository;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,13 +18,13 @@ import static org.mockito.Mockito.when;
 
 class UserDetailsServiceImplTest {
 
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepositoryPort;
     private UserDetailsServiceImpl userDetailsService;
 
     @BeforeEach
     void setUp() {
-        userRepository = mock(UserRepository.class);
-        userDetailsService = new UserDetailsServiceImpl(userRepository);
+        userRepositoryPort = mock(UserRepositoryPort.class);
+        userDetailsService = new UserDetailsServiceImpl(userRepositoryPort);
     }
 
     @Test
@@ -43,7 +43,7 @@ class UserDetailsServiceImplTest {
                 .role(new Role(1L, RoleName.ADMINISTRATOR, "Admin role"))
                 .build();
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.of(user));
 
         // When
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -60,7 +60,7 @@ class UserDetailsServiceImplTest {
     void shouldThrowExceptionWhenUserNotFound() {
         // Given
         String email = "notfound@example.com";
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.empty());
 
         // When / Then
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () ->

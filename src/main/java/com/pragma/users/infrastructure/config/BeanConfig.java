@@ -2,11 +2,11 @@ package com.pragma.users.infrastructure.config;
 
 import com.pragma.users.application.port.input.CreateOwnerUseCase;
 import com.pragma.users.application.port.input.FindUserByIdUseCase;
-import com.pragma.users.application.service.CreateOwnerService;
-import com.pragma.users.application.service.FindUserByIdService;
+import com.pragma.users.application.service.CreateOwnerUseCaseImpl;
+import com.pragma.users.application.service.FindUserByIdUseCaseImpl;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
-import com.pragma.users.domain.port.output.RoleRepository;
-import com.pragma.users.domain.port.output.UserRepository;
+import com.pragma.users.domain.port.output.RoleRepositoryPort;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,15 +21,15 @@ public class BeanConfig {
 
     @Bean
     public CreateOwnerUseCase createOwnerUseCase(
-            UserRepository userRepository,
-            RoleRepository roleRepository,
+            UserRepositoryPort userRepositoryPort,
+            RoleRepositoryPort roleRepositoryPort,
             EncryptPasswordPort encryptPasswordPort
     ) {
-        return new CreateOwnerService(userRepository, roleRepository, encryptPasswordPort);
+        return new CreateOwnerUseCaseImpl(userRepositoryPort, roleRepositoryPort, encryptPasswordPort);
     }
 
     @Bean
-    public FindUserByIdUseCase findUserByIdUseCase(UserRepository userRepository) {
-        return new FindUserByIdService(userRepository);
+    public FindUserByIdUseCase findUserByIdUseCase(UserRepositoryPort userRepositoryPort) {
+        return new FindUserByIdUseCaseImpl(userRepositoryPort);
     }
 }

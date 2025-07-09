@@ -1,7 +1,7 @@
 package com.pragma.users.infrastructure.adapter.output.security;
 
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.output.UserRepository;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepositoryPort;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username)
+        User user = userRepositoryPort.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("El usuario con email " + username + " no existe."));
 
         String roleName = "ROLE_" + user.getRole().getName().name();

@@ -4,7 +4,7 @@ import com.pragma.users.domain.model.User;
 
 import java.util.Optional;
 
-public interface UserRepository {
+public interface UserRepositoryPort {
     User save(User user);
 
     Optional<User> findByEmail(String email);

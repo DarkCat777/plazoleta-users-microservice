@@ -9,29 +9,29 @@ import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
-import com.pragma.users.domain.port.output.RoleRepository;
-import com.pragma.users.domain.port.output.UserRepository;
+import com.pragma.users.domain.port.output.RoleRepositoryPort;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.Period;
 
 @RequiredArgsConstructor
-public class CreateOwnerService implements CreateOwnerUseCase {
+public class CreateOwnerUseCaseImpl implements CreateOwnerUseCase {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final UserRepositoryPort userRepositoryPort;
+    private final RoleRepositoryPort roleRepositoryPort;
     private final EncryptPasswordPort passwordEncoder;
 
     @Override
     public User createOwner(CreateOwnerCommand command) {
-        if (userRepository.existsByEmail(command.getEmail())) {
+        if (userRepositoryPort.existsByEmail(command.getEmail())) {
             throw new UserAlreadyExistsException(command.getEmail());
         }
         if (Period.between(command.getBirthdate(), LocalDate.now()).getYears() < 18) {
             throw new UnderageUserException();
         }
-        Role role = roleRepository.findByName(RoleName.OWNER)
+        Role role = roleRepositoryPort.findByName(RoleName.OWNER)
                 .orElseThrow(() -> new RoleNotFoundException(RoleName.OWNER.name()));
         User user = User.builder()
                 .firstname(command.getFirstname())
@@ -43,6 +43,6 @@ public class CreateOwnerService implements CreateOwnerUseCase {
                 .password(passwordEncoder.encode(command.getPassword()))
                 .role(role)
                 .build();
-        return userRepository.save(user);
+        return userRepositoryPort.save(user);
     }
 }

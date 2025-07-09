@@ -7,8 +7,8 @@ import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.domain.port.output.EncryptPasswordPort;
-import com.pragma.users.domain.port.output.RoleRepository;
-import com.pragma.users.domain.port.output.UserRepository;
+import com.pragma.users.domain.port.output.RoleRepositoryPort;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,19 +24,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CreateOwnerServiceTest {
+class CreateOwnerUseCaseImplTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepositoryPort;
 
     @Mock
-    private RoleRepository roleRepository;
+    private RoleRepositoryPort roleRepositoryPort;
 
     @Mock
     private EncryptPasswordPort passwordEncoder;
 
     @InjectMocks
-    private CreateOwnerService createOwnerService;
+    private CreateOwnerUseCaseImpl createOwnerService;
 
     private CreateOwnerCommand validCommand;
 
@@ -56,33 +56,33 @@ class CreateOwnerServiceTest {
     @Test
     void shouldThrowExceptionWhenUserAlreadyExists() {
         // Given
-        when(userRepository.existsByEmail(validCommand.getEmail())).thenReturn(true);
+        when(userRepositoryPort.existsByEmail(validCommand.getEmail())).thenReturn(true);
 
         // When / Then
         assertThrows(UserAlreadyExistsException.class, () -> createOwnerService.createOwner(validCommand));
-        verify(userRepository).existsByEmail(validCommand.getEmail());
-        verifyNoMoreInteractions(userRepository, roleRepository, passwordEncoder);
+        verify(userRepositoryPort).existsByEmail(validCommand.getEmail());
+        verifyNoMoreInteractions(userRepositoryPort, roleRepositoryPort, passwordEncoder);
     }
 
     @Test
     void shouldThrowExceptionWhenUserIsUnderage() {
         // Given
         validCommand.setBirthdate(LocalDate.now().minusYears(17)); // menor de edad
-        when(userRepository.existsByEmail(validCommand.getEmail())).thenReturn(false);
+        when(userRepositoryPort.existsByEmail(validCommand.getEmail())).thenReturn(false);
 
         // When / Then
         assertThrows(UnderageUserException.class, () -> createOwnerService.createOwner(validCommand));
-        verify(userRepository).existsByEmail(validCommand.getEmail());
-        verifyNoMoreInteractions(userRepository, roleRepository, passwordEncoder);
+        verify(userRepositoryPort).existsByEmail(validCommand.getEmail());
+        verifyNoMoreInteractions(userRepositoryPort, roleRepositoryPort, passwordEncoder);
     }
 
     @Test
     void shouldCreateOwnerSuccessfully() {
         // Given
-        when(userRepository.existsByEmail(validCommand.getEmail())).thenReturn(false);
+        when(userRepositoryPort.existsByEmail(validCommand.getEmail())).thenReturn(false);
 
         Role ownerRole = Role.builder().id(1L).name(RoleName.OWNER).build();
-        when(roleRepository.findByName(RoleName.OWNER)).thenReturn(Optional.of(ownerRole));
+        when(roleRepositoryPort.findByName(RoleName.OWNER)).thenReturn(Optional.of(ownerRole));
 
         when(passwordEncoder.encode(validCommand.getPassword())).thenReturn("encodedPassword");
 
@@ -97,7 +97,7 @@ class CreateOwnerServiceTest {
                 .role(ownerRole)
                 .build();
 
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepositoryPort.save(any(User.class))).thenReturn(savedUser);
 
         // When
         User result = createOwnerService.createOwner(validCommand);
@@ -108,9 +108,9 @@ class CreateOwnerServiceTest {
         assertEquals("encodedPassword", result.getPassword());
         assertEquals(ownerRole, result.getRole());
 
-        Mockito.verify(userRepository).existsByEmail(validCommand.getEmail());
-        Mockito.verify(roleRepository).findByName(RoleName.OWNER);
+        Mockito.verify(userRepositoryPort).existsByEmail(validCommand.getEmail());
+        Mockito.verify(roleRepositoryPort).findByName(RoleName.OWNER);
         Mockito.verify(passwordEncoder).encode(validCommand.getPassword());
-        Mockito.verify(userRepository).save(Mockito.any(User.class));
+        Mockito.verify(userRepositoryPort).save(Mockito.any(User.class));
     }
 }

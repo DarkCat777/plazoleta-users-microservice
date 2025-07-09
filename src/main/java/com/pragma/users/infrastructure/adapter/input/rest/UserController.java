@@ -6,7 +6,7 @@ import com.pragma.users.application.port.input.FindUserByIdUseCase;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.infrastructure.adapter.input.dto.ErrorResponse;
 import com.pragma.users.infrastructure.adapter.input.dto.UserResponse;
-import com.pragma.users.infrastructure.adapter.mapper.UserMapper;
+import com.pragma.users.infrastructure.adapter.mapper.UserResponseMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +27,7 @@ public class UserController {
 
     private final CreateOwnerUseCase createOwnerUseCase;
     private final FindUserByIdUseCase findUserByIdUseCase;
-    private final UserMapper userMapper;
+    private final UserResponseMapper userMapper;
 
     @Operation(summary = "Create owner user")
     @SecurityRequirement(name = "Bearer Auth")

@@ -2,7 +2,7 @@ package com.pragma.users.application.service;
 
 import com.pragma.users.application.exception.UserNotFoundException;
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.output.UserRepository;
+import com.pragma.users.domain.port.output.UserRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,13 +16,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FindUserByIdServiceTest {
+class FindUserByIdUseCaseImplTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepositoryPort;
 
     @InjectMocks
-    private FindUserByIdService findUserByIdService;
+    private FindUserByIdUseCaseImpl findUserByIdUseCaseImpl;
 
     @Test
     void shouldReturnUserWhenExists() {
@@ -30,30 +30,30 @@ class FindUserByIdServiceTest {
         Long userId = 1L;
         User user = User.builder().id(userId).email("john@example.com").build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepositoryPort.findById(userId)).thenReturn(Optional.of(user));
 
         // When
-        User result = findUserByIdService.getById(userId);
+        User result = findUserByIdUseCaseImpl.getById(userId);
 
         // Then
         assertNotNull(result);
         assertEquals(userId, result.getId());
         assertEquals("john@example.com", result.getEmail());
 
-        verify(userRepository).findById(userId);
+        verify(userRepositoryPort).findById(userId);
     }
 
     @Test
     void shouldThrowExceptionWhenUserDoesNotExist() {
         // Given
         Long userId = 99L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepositoryPort.findById(userId)).thenReturn(Optional.empty());
 
         // When / Then
         UserNotFoundException exception = assertThrows(UserNotFoundException.class,
-                () -> findUserByIdService.getById(userId));
+                () -> findUserByIdUseCaseImpl.getById(userId));
 
         assertEquals("Usuario no encontrado con el id: 99", exception.getMessage());
-        verify(userRepository).findById(userId);
+        verify(userRepositoryPort).findById(userId);
     }
 }
