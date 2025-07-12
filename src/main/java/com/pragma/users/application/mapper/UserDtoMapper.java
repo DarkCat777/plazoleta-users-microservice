@@ -8,11 +8,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {RoleDtoMapper.class})
-public interface UserDtoMapper extends BaseDtoMapper<User, CreateUserCommand, UserResponse> {
+public interface UserDtoMapper {
 
     @Mapping(target = "id", ignore = true) // no viene del request
     @Mapping(target = "role", ignore = true) // se asigna en la capa de dominio
-    @Override
     User toDomain(CreateUserCommand request);
 
+    UserResponse toResponse(User domain);
 }
