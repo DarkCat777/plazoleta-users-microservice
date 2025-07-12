@@ -1,10 +1,10 @@
 package com.pragma.users.infrastructure.adapter.input.rest;
 
-import com.pragma.users.application.port.input.FindUserByEmailUseCase;
+import com.pragma.users.application.dto.request.AuthenticationQuery;
+import com.pragma.users.application.dto.response.AuthenticationResponse;
 import com.pragma.users.domain.model.User;
+import com.pragma.users.domain.port.input.usecase.UserUseCase;
 import com.pragma.users.domain.port.output.TokenProviderPort;
-import com.pragma.users.infrastructure.adapter.input.rest.request.AuthenticationRequest;
-import com.pragma.users.infrastructure.adapter.input.rest.response.AuthenticationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,20 +23,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
-    private final FindUserByEmailUseCase findUserByEmailUseCase;
+    private final UserUseCase useCase;
     private final TokenProviderPort tokenProviderPort;
 
     @PostMapping("/authenticate")
-    public AuthenticationResponse authenticate(@RequestBody @Validated final AuthenticationRequest authenticationRequest) {
+    public AuthenticationResponse authenticate(@RequestBody @Validated final AuthenticationQuery authenticationQuery) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(authenticationQuery.username(), authenticationQuery.password())
             );
         } catch (final BadCredentialsException ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        final User user = findUserByEmailUseCase.getByEmail(authenticationRequest.getUsername());
+        final User user = useCase.findByEmail(authenticationQuery.username());
         return new AuthenticationResponse(tokenProviderPort.generateToken(user));
     }
 

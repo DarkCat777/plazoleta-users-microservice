@@ -1,6 +1,6 @@
 package com.pragma.users.infrastructure.adapter.input.security;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.pragma.users.domain.model.AuthenticatedUser;
 import com.pragma.users.domain.port.output.TokenProviderPort;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -51,9 +51,9 @@ public class JwtAuthenticationRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        DecodedJWT decodedToken = tokenProvider.validateToken(token);
+        AuthenticatedUser authenticatedUser = tokenProvider.decodeToken(token);
 
-        if (decodedToken == null || decodedToken.getSubject() == null || decodedToken.getSubject().isBlank()) {
+        if (authenticatedUser == null || authenticatedUser.getEmail() == null || authenticatedUser.getEmail().isBlank()) {
             log.error("Invalid token: {}", token);
             chain.doFilter(request, response);
             return;
@@ -62,9 +62,9 @@ public class JwtAuthenticationRequestFilter extends OncePerRequestFilter {
         UserDetails userDetails;
 
         try {
-            userDetails = userDetailsService.loadUserByUsername(decodedToken.getSubject());
+            userDetails = userDetailsService.loadUserByUsername(authenticatedUser.getEmail());
         } catch (UsernameNotFoundException ex) {
-            log.warn("User not found: {}", decodedToken.getSubject());
+            log.warn("User not found: {}", authenticatedUser.getEmail());
             chain.doFilter(request, response);
             return;
         }
@@ -75,7 +75,7 @@ public class JwtAuthenticationRequestFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("Authentication successful for user: {}", decodedToken.getSubject());
+        log.info("Authentication successful for user: {}", authenticatedUser.getEmail());
 
         chain.doFilter(request, response);
     }

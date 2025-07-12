@@ -1,10 +1,10 @@
 package com.pragma.users.infrastructure.adapter.input.rest.handler;
 
-import com.pragma.users.application.exception.RoleNotFoundException;
-import com.pragma.users.application.exception.UnderageUserException;
-import com.pragma.users.application.exception.UserAlreadyExistsException;
-import com.pragma.users.application.exception.UserNotFoundException;
-import com.pragma.users.infrastructure.adapter.input.rest.response.ErrorResponse;
+import com.pragma.users.application.dto.response.ErrorResponse;
+import com.pragma.users.domain.exception.RoleNotFoundException;
+import com.pragma.users.domain.exception.UserAlreadyExistsException;
+import com.pragma.users.domain.exception.UserNotFoundException;
+import com.pragma.users.domain.validation.exception.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,12 +26,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUserAlreadyExists(
             UserAlreadyExistsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "Usuario ya existe", ex.getMessage(), request);
-    }
-
-    @ExceptionHandler(UnderageUserException.class)
-    public ResponseEntity<ErrorResponse> handleUnderage(
-            UnderageUserException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "Usuario menor de edad", ex.getMessage(), request);
     }
 
     @ExceptionHandler(RoleNotFoundException.class)
@@ -54,6 +51,25 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Datos inválidos", message, request);
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleDomainValidationException(
+            ValidationException ex, HttpServletRequest request) {
+        Map<String, List<String>> fieldErrors = new HashMap<>();
+        ex.getErrors().forEach(error -> {
+            fieldErrors.computeIfAbsent(error.getField(), key -> new ArrayList<>());
+            fieldErrors.get(error.getField()).add(error.getMessage());
+        });
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Validación de dominio",
+                null,
+                request.getRequestURI(),
+                fieldErrors
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(
             Exception ex, HttpServletRequest request) {
@@ -68,7 +84,8 @@ public class GlobalExceptionHandler {
                         status.value(),
                         error,
                         message,
-                        request.getRequestURI()
+                        request.getRequestURI(),
+                        null
                 )
         );
     }

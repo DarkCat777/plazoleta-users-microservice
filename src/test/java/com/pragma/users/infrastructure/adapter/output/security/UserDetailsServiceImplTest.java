@@ -3,7 +3,7 @@ package com.pragma.users.infrastructure.adapter.output.security;
 import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
-import com.pragma.users.domain.port.output.UserRepositoryPort;
+import com.pragma.users.domain.port.output.persistence.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,6 +1,6 @@
 package com.pragma.users.infrastructure.adapter.output.security;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.pragma.users.domain.model.AuthenticatedUser;
 import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
@@ -44,11 +44,10 @@ class JwtTokenProviderTest {
 
         // Then
         assertNotNull(token);
-        DecodedJWT decodedJWT = jwtTokenProvider.validateToken(token);
-        assertNotNull(decodedJWT);
-        assertEquals("john@example.com", decodedJWT.getSubject());
-        assertEquals("test-app", decodedJWT.getIssuer());
-        assertTrue(decodedJWT.getClaim("roles").asList(String.class).contains("ROLE_OWNER"));
+        AuthenticatedUser authenticatedUser = jwtTokenProvider.decodeToken(token);
+        assertNotNull(authenticatedUser);
+        assertEquals("john@example.com", authenticatedUser.getEmail());
+        assertTrue(authenticatedUser.getRoles().contains("ROLE_OWNER"));
     }
 
     @Test
@@ -57,9 +56,9 @@ class JwtTokenProviderTest {
         String invalidToken = "invalid.jwt.token";
 
         // When
-        DecodedJWT result = jwtTokenProvider.validateToken(invalidToken);
+        AuthenticatedUser authenticatedUser = jwtTokenProvider.decodeToken(invalidToken);
 
         // Then
-        assertNull(result);
+        assertNull(authenticatedUser);
     }
 }

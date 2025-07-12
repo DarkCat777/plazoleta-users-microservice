@@ -1,16 +1,9 @@
 package com.pragma.users.infrastructure.adapter.input.rest;
 
-import com.pragma.users.application.dto.CreateCustomerCommand;
-import com.pragma.users.application.dto.CreateEmployeeCommand;
-import com.pragma.users.application.dto.CreateOwnerCommand;
-import com.pragma.users.application.port.input.CreateCustomerUseCase;
-import com.pragma.users.application.port.input.CreateEmployeeUseCase;
-import com.pragma.users.application.port.input.CreateOwnerUseCase;
-import com.pragma.users.application.port.input.FindUserByIdUseCase;
-import com.pragma.users.domain.model.User;
-import com.pragma.users.infrastructure.adapter.input.rest.response.ErrorResponse;
-import com.pragma.users.infrastructure.adapter.input.rest.response.UserResponse;
-import com.pragma.users.infrastructure.adapter.mapper.UserResponseMapper;
+import com.pragma.users.application.dto.request.CreateUserCommand;
+import com.pragma.users.application.dto.response.ErrorResponse;
+import com.pragma.users.application.dto.response.UserResponse;
+import com.pragma.users.application.port.output.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,11 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final FindUserByIdUseCase findUserByIdUseCase;
-    private final CreateOwnerUseCase createOwnerUseCase;
-    private final CreateEmployeeUseCase createEmployeeUseCase;
-    private final CreateCustomerUseCase createCustomerUseCase;
-    private final UserResponseMapper userMapper;
+    private final UserService userService;
 
     @Operation(summary = "Find user by Id")
     @SecurityRequirement(name = "Bearer Auth")
@@ -46,8 +35,7 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        User user = findUserByIdUseCase.getById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(userMapper.toResponse(user));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.findUserById(id));
     }
 
     @Operation(summary = "Create owner user")
@@ -60,9 +48,8 @@ public class UserController {
     })
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @PostMapping("/owner")
-    public ResponseEntity<UserResponse> createOwner(@Validated @RequestBody CreateOwnerCommand request) {
-        User user = createOwnerUseCase.createOwner(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
+    public ResponseEntity<UserResponse> createOwner(@Validated @RequestBody CreateUserCommand request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createOwner(request));
     }
 
     @Operation(summary = "Create employee user")
@@ -75,9 +62,8 @@ public class UserController {
     })
     @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/employee")
-    public ResponseEntity<UserResponse> createEmployee(@Validated @RequestBody CreateEmployeeCommand request) {
-        User user = createEmployeeUseCase.createEmployee(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
+    public ResponseEntity<UserResponse> createEmployee(@Validated @RequestBody CreateUserCommand request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createEmployee(request));
     }
 
     @Operation(summary = "Create customer user")
@@ -88,8 +74,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/customer")
-    public ResponseEntity<UserResponse> createCustomer(@Validated @RequestBody CreateCustomerCommand request) {
-        User user = createCustomerUseCase.createCustomer(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(user));
+    public ResponseEntity<UserResponse> createCustomer(@Validated @RequestBody CreateUserCommand request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createCustomer(request));
     }
 }

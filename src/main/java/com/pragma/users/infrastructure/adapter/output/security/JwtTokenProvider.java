@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.pragma.users.domain.model.AuthenticatedUser;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.domain.port.output.TokenProviderPort;
 import lombok.extern.log4j.Log4j2;
@@ -49,9 +50,15 @@ public class JwtTokenProvider implements TokenProviderPort {
     }
 
     @Override
-    public DecodedJWT validateToken(final String token) {
+    public AuthenticatedUser decodeToken(final String token) {
         try {
-            return verifier.verify(token);
+            DecodedJWT decodedJWT = verifier.verify(token);
+            List<String> roles = decodedJWT.getClaim("roles").asList(String.class);
+            return AuthenticatedUser.builder()
+                    .id(decodedJWT.getClaim("id").asLong())
+                    .email(decodedJWT.getSubject())
+                    .roles(roles)
+                    .build();
         } catch (final JWTVerificationException verificationEx) {
             log.warn("Token invalid: {}", verificationEx.getMessage());
             return null;
