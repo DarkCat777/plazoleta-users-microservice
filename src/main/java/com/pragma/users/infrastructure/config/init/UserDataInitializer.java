@@ -1,10 +1,10 @@
 package com.pragma.users.infrastructure.config.init;
 
 import com.pragma.users.domain.model.RoleName;
-import com.pragma.users.infrastructure.adapter.output.model.JpaRoleEntity;
-import com.pragma.users.infrastructure.adapter.output.model.JpaUserEntity;
-import com.pragma.users.infrastructure.adapter.output.repository.JpaRoleRepository;
-import com.pragma.users.infrastructure.adapter.output.repository.JpaUserRepository;
+import com.pragma.users.infrastructure.output.jpa.model.JpaRoleEntity;
+import com.pragma.users.infrastructure.output.jpa.model.JpaUserEntity;
+import com.pragma.users.infrastructure.output.jpa.repository.JpaRoleRepository;
+import com.pragma.users.infrastructure.output.jpa.repository.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;

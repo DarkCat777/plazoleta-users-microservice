@@ -1,6 +1,6 @@
 package com.pragma.users.infrastructure.config;
 
-import com.pragma.users.infrastructure.adapter.input.security.JwtAuthenticationRequestFilter;
+import com.pragma.users.infrastructure.security.JwtAuthenticationRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

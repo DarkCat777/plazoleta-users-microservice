@@ -1,10 +1,10 @@
 package com.pragma.users.infrastructure.config;
 
-import com.pragma.users.domain.port.input.usecase.UserUseCase;
-import com.pragma.users.domain.port.input.usecase.impl.UserUseCaseImpl;
-import com.pragma.users.domain.port.output.EncryptPasswordPort;
-import com.pragma.users.domain.port.output.persistence.RoleRepositoryPort;
-import com.pragma.users.domain.port.output.persistence.UserRepositoryPort;
+import com.pragma.users.domain.spi.EncryptPasswordPort;
+import com.pragma.users.domain.spi.persistence.RoleRepositoryPort;
+import com.pragma.users.domain.spi.persistence.UserRepositoryPort;
+import com.pragma.users.domain.usecase.UserUseCase;
+import com.pragma.users.domain.usecase.impl.UserUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
