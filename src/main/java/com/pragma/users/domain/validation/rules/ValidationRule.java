@@ -1,9 +1,9 @@
 package com.pragma.users.domain.validation.rules;
 
-import com.pragma.users.domain.validation.FieldValidationError;
+import com.pragma.users.domain.validation.errors.ValidationError;
 
 import java.util.Optional;
 
 public interface ValidationRule<T> {
-    Optional<FieldValidationError> validate(T target);
+    Optional<ValidationError> validate(T target);
 }

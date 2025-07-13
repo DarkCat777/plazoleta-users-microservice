@@ -1,4 +1,4 @@
-package com.pragma.users.domain.validation.extractor;
+package com.pragma.users.domain.validation.rules.extractor;
 
 import java.util.function.Function;
 

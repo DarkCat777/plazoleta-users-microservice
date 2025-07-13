@@ -1,6 +1,7 @@
 package com.pragma.users.domain.validation.rules.impl;
 
-import com.pragma.users.domain.validation.FieldValidationError;
+import com.pragma.users.domain.validation.errors.ValidationError;
+import com.pragma.users.domain.validation.errors.impl.FieldError;
 import com.pragma.users.domain.validation.rules.ValidationRule;
 import lombok.RequiredArgsConstructor;
 
@@ -16,17 +17,17 @@ public class PatternRule<T> implements ValidationRule<T> {
     private final String pattern;
     private final String message;
 
-    public static final String DEFAULT_MESSAGE = "Debe seguir el siguiente patron '{0}'.";
+    public static final String DEFAULT_MESSAGE = "Debe seguir el siguiente patron {0}.";
 
     public PatternRule(String fieldName, Function<T, String> extractor, String pattern) {
         this(fieldName, extractor, pattern, DEFAULT_MESSAGE);
     }
 
     @Override
-    public Optional<FieldValidationError> validate(T target) {
+    public Optional<ValidationError> validate(T target) {
         String value = extractor.apply(target);
         if (value == null || !value.matches(pattern)) {
-            return Optional.of(new FieldValidationError(fieldName, value, MessageFormat.format(message, pattern, value)));
+            return Optional.of(new FieldError(fieldName, value, MessageFormat.format(message, pattern, value)));
         }
         return Optional.empty();
     }

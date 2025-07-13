@@ -1,6 +1,7 @@
 package com.pragma.users.infrastructure.exceptionhandler;
 
 import com.pragma.users.application.dto.response.ErrorResponse;
+import com.pragma.users.application.dto.response.ValidationErrorResponse;
 import com.pragma.users.domain.exception.RoleNotFoundException;
 import com.pragma.users.domain.exception.UserAlreadyExistsException;
 import com.pragma.users.domain.exception.UserNotFoundException;
@@ -8,15 +9,12 @@ import com.pragma.users.domain.validation.exception.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -52,22 +50,33 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleDomainValidationException(
+    public ResponseEntity<ErrorResponse> handleValidationException(
             ValidationException ex, HttpServletRequest request) {
-        Map<String, List<String>> fieldErrors = new HashMap<>();
-        ex.getErrors().forEach(error -> {
-            fieldErrors.computeIfAbsent(error.getField(), key -> new ArrayList<>());
-            fieldErrors.get(error.getField()).add(error.getMessage());
-        });
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Validación de dominio",
                 null,
                 request.getRequestURI(),
-                fieldErrors
+                ex.getErrors().stream()
+                        .map(ValidationErrorResponse::from)
+                        .toList()
         );
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(
+            AuthorizationDeniedException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "Forbidden",
+                "Acceso no autorizado",
+                request
+        );
     }
 
     @ExceptionHandler(Exception.class)

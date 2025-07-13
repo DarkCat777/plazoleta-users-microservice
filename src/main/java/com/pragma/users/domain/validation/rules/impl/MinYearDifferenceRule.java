@@ -1,6 +1,7 @@
 package com.pragma.users.domain.validation.rules.impl;
 
-import com.pragma.users.domain.validation.FieldValidationError;
+import com.pragma.users.domain.validation.errors.ValidationError;
+import com.pragma.users.domain.validation.errors.impl.FieldError;
 import com.pragma.users.domain.validation.rules.ValidationRule;
 import lombok.RequiredArgsConstructor;
 
@@ -19,18 +20,18 @@ public class MinYearDifferenceRule<T> implements ValidationRule<T> {
     private final int minYears;
     private final String message;
 
-    public static final String DEFAULT_MESSAGE = "La diferencia entre años debe de ser de al menos '{0}' años.";
+    public static final String DEFAULT_MESSAGE = "La diferencia entre años debe de ser de al menos {0} años.";
 
     public MinYearDifferenceRule(String fieldName, Function<T, LocalDate> referenceExtractor, Function<T, LocalDate> extractor, int minYears) {
         this(fieldName, referenceExtractor, extractor, minYears, DEFAULT_MESSAGE);
     }
 
     @Override
-    public Optional<FieldValidationError> validate(T target) {
+    public Optional<ValidationError> validate(T target) {
         LocalDate date = extractor.apply(target);
         LocalDate fromDate = referenceExtractor.apply(target);
         if (date == null || Period.between(date, fromDate).getYears() < minYears) {
-            return Optional.of(new FieldValidationError(fieldName, date, MessageFormat.format(message, minYears)));
+            return Optional.of(new FieldError(fieldName, date, MessageFormat.format(message, minYears)));
         }
         return Optional.empty();
     }

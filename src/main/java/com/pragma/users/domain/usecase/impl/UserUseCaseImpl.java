@@ -30,6 +30,7 @@ public class UserUseCaseImpl implements UserUseCase {
                 .pattern("phoneNumber", User::getPhoneNumber, "^\\+?[0-9]{1,13}$")
                 .notNull("birthdate", User::getBirthdate)
                 .email("email", User::getEmail)
+                .notBlank("password", User::getPassword)
                 .build()
                 .validate();
 
@@ -54,6 +55,7 @@ public class UserUseCaseImpl implements UserUseCase {
                 .pattern("identityDocument", User::getIdentityDocument, "\\d+")
                 .pattern("phoneNumber", User::getPhoneNumber, "^\\+?[0-9]{1,13}$")
                 .email("email", User::getEmail)
+                .notBlank("password", User::getPassword)
                 .build()
                 .validate();
 
@@ -79,6 +81,7 @@ public class UserUseCaseImpl implements UserUseCase {
                 .pattern("phoneNumber", User::getPhoneNumber, "^\\+?[0-9]{1,13}$")
                 .minYearDifference("birthdate", User::getBirthdate, 18)
                 .email("email", User::getEmail)
+                .notBlank("password", User::getPassword)
                 .build()
                 .validate();
 
