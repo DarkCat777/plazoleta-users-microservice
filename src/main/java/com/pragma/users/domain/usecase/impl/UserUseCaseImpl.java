@@ -1,13 +1,16 @@
 package com.pragma.users.domain.usecase.impl;
 
 
+import com.pragma.users.domain.exception.RestaurantNotFoundException;
 import com.pragma.users.domain.exception.RoleNotFoundException;
 import com.pragma.users.domain.exception.UserAlreadyExistsException;
 import com.pragma.users.domain.exception.UserNotFoundException;
+import com.pragma.users.domain.model.Restaurant;
 import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.domain.spi.EncryptPasswordPort;
+import com.pragma.users.domain.spi.RestaurantClientPort;
 import com.pragma.users.domain.spi.persistence.RoleRepositoryPort;
 import com.pragma.users.domain.spi.persistence.UserRepositoryPort;
 import com.pragma.users.domain.usecase.UserUseCase;
@@ -19,6 +22,7 @@ public class UserUseCaseImpl implements UserUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final RoleRepositoryPort roleRepositoryPort;
+    private final RestaurantClientPort restaurantClientPort;
     private final EncryptPasswordPort passwordEncoder;
 
     @Override
@@ -66,8 +70,12 @@ public class UserUseCaseImpl implements UserUseCase {
         Role role = roleRepositoryPort.findByName(RoleName.EMPLOYEE)
                 .orElseThrow(() -> new RoleNotFoundException(RoleName.EMPLOYEE.name()));
 
-        user.setRole(role);
+        Restaurant restaurant = restaurantClientPort.findByOwner()
+                .orElseThrow(() -> new RestaurantNotFoundException("El propietario no tiene un restaurante."));
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(role);
+        user.setRestaurantId(restaurant.getId());
 
         return userRepositoryPort.save(user);
     }

@@ -13,5 +13,10 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
+
+plazoleta:
+  client:
+    url: localhost:8082/api/v1
+
 server:
   port: 8081

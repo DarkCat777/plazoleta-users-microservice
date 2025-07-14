@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -48,7 +47,7 @@ public class UserController {
     })
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @PostMapping("/owner")
-    public ResponseEntity<UserResponse> createOwner(@Validated @RequestBody CreateUserCommand request) {
+    public ResponseEntity<UserResponse> createOwner(@RequestBody CreateUserCommand request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createOwner(request));
     }
 
@@ -62,7 +61,7 @@ public class UserController {
     })
     @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/employee")
-    public ResponseEntity<UserResponse> createEmployee(@Validated @RequestBody CreateUserCommand request) {
+    public ResponseEntity<UserResponse> createEmployee(@RequestBody CreateUserCommand request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createEmployee(request));
     }
 
@@ -74,7 +73,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/customer")
-    public ResponseEntity<UserResponse> createCustomer(@Validated @RequestBody CreateUserCommand request) {
+    public ResponseEntity<UserResponse> createCustomer(@RequestBody CreateUserCommand request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createCustomer(request));
     }
 }

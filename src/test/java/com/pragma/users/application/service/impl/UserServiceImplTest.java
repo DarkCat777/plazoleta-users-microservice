@@ -42,10 +42,10 @@ class UserServiceImplTest {
                 LocalDate.of(1990, 1, 1), "john@example.com", "password");
 
         Role role = new Role(1L, RoleName.CUSTOMER, "Customer role");
-        user = new User(null, "John", "Doe", "12345678", "+123456789", LocalDate.of(1990, 1, 1), "john@example.com", "password", role);
+        user = new User(null, "John", "Doe", "12345678", "+123456789", LocalDate.of(1990, 1, 1), "john@example.com", "password", 1L, role);
 
         RoleResponse roleResponse = new RoleResponse(1L, "CUSTOMER", "Customer role");
-        userResponse = new UserResponse(1L, "John", "Doe", "john@example.com", "+123456789", "12345678", LocalDate.of(1990, 1, 1), roleResponse);
+        userResponse = new UserResponse(1L, "John", "Doe", "+123456789", "12345678", LocalDate.of(1990, 1, 1), "john@example.com", 1L, roleResponse);
     }
 
     @Test

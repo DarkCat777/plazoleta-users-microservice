@@ -11,7 +11,8 @@ import com.pragma.users.config.TestSecurityConfig;
 import com.pragma.users.domain.exception.RoleNotFoundException;
 import com.pragma.users.domain.exception.UserAlreadyExistsException;
 import com.pragma.users.domain.exception.UserNotFoundException;
-import com.pragma.users.domain.validation.FieldValidationError;
+import com.pragma.users.domain.validation.errors.ValidationError;
+import com.pragma.users.domain.validation.errors.impl.FieldError;
 import com.pragma.users.domain.validation.exception.ValidationException;
 import com.pragma.users.infrastructure.exceptionhandler.GlobalExceptionHandler;
 import com.pragma.users.infrastructure.security.JwtAuthenticationRequestFilter;
@@ -60,7 +61,7 @@ class UserControllerTest {
                 LocalDate.of(2000, 1, 1), "john@example.com", "password");
 
         RoleResponse roleResponse = new RoleResponse(2L, "OWNER", "Owner role");
-        UserResponse userResponse = new UserResponse(1L, "John", "Doe", "john@example.com", "987654321", "12345678", LocalDate.of(2000, 1, 1), roleResponse);
+        UserResponse userResponse = new UserResponse(1L, "John", "Doe", "987654321", "12345678", LocalDate.of(2000, 1, 1), "john@example.com", 1L, roleResponse);
 
         when(userService.createOwner(request)).thenReturn(userResponse);
 
@@ -97,8 +98,8 @@ class UserControllerTest {
         CreateUserCommand request = new CreateUserCommand("Bad", "User", "00000000", "000000000",
                 LocalDate.of(2020, 1, 1), "baduser@example.com", "password");
 
-        List<FieldValidationError> errors = List.of(
-                new FieldValidationError("birthdate", request.birthdate(), "El usuario debe ser mayor de edad")
+        List<ValidationError> errors = List.of(
+                new FieldError("birthdate", request.birthdate(), "El usuario debe ser mayor de edad")
         );
 
         when(userService.createOwner(request)).thenThrow(new ValidationException(errors));
@@ -108,7 +109,8 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Validación de dominio"))
-                .andExpect(jsonPath("$.messages.birthdate[0]").value("El usuario debe ser mayor de edad"));
+                .andExpect(jsonPath("$.errors[0].field").value("birthdate"))
+                .andExpect(jsonPath("$.errors[0].messages[0]").value("El usuario debe ser mayor de edad"));
     }
 
     @Test
@@ -133,7 +135,7 @@ class UserControllerTest {
     void shouldReturnUserByIdSuccessfully() throws Exception {
         Long userId = 1L;
         RoleResponse roleResponse = new RoleResponse(1L, "ADMINISTRATOR", "Admin role");
-        UserResponse response = new UserResponse(userId, "Jane", "Doe", "jane@example.com", "123456789", "73108217", LocalDate.now(), roleResponse);
+        UserResponse response = new UserResponse(userId, "Jane", "Doe", "73108217", "123456789", LocalDate.now(), "jane@example.com", 1L, roleResponse);
 
         when(userService.findUserById(userId)).thenReturn(response);
 

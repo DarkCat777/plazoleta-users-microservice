@@ -3,12 +3,15 @@ package com.pragma.users.domain.usecase.impl;
 import com.pragma.users.domain.exception.RoleNotFoundException;
 import com.pragma.users.domain.exception.UserAlreadyExistsException;
 import com.pragma.users.domain.exception.UserNotFoundException;
+import com.pragma.users.domain.model.Restaurant;
 import com.pragma.users.domain.model.Role;
 import com.pragma.users.domain.model.RoleName;
 import com.pragma.users.domain.model.User;
 import com.pragma.users.domain.spi.EncryptPasswordPort;
+import com.pragma.users.domain.spi.RestaurantClientPort;
 import com.pragma.users.domain.spi.persistence.RoleRepositoryPort;
 import com.pragma.users.domain.spi.persistence.UserRepositoryPort;
+import com.pragma.users.domain.validation.errors.WithField;
 import com.pragma.users.domain.validation.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,9 @@ class UserUseCaseImplTest {
 
     @Mock
     private RoleRepositoryPort roleRepository;
+
+    @Mock
+    private RestaurantClientPort restaurantClient;
 
     @Mock
     private EncryptPasswordPort encryptPassword;
@@ -91,9 +97,11 @@ class UserUseCaseImplTest {
     void shouldCreateEmployeeSuccessfully() {
         User user = getValidUser();
         Role role = new Role(2L, RoleName.EMPLOYEE, "Empleado");
+        Restaurant restaurant = new Restaurant(1L, "Pragma", "Dirección", "9845698546", "logoUrl", "56945869", 1L);
 
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(roleRepository.findByName(RoleName.EMPLOYEE)).thenReturn(Optional.of(role));
+        when(restaurantClient.findByOwner()).thenReturn(Optional.of(restaurant));
         when(encryptPassword.encode(user.getPassword())).thenReturn("encrypted");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -181,46 +189,46 @@ class UserUseCaseImplTest {
 
     @Test
     void shouldThrowValidationExceptionWhenFirstnameIsBlank() {
-        User user = new User(null, "", "Doe", "12345678", "+123456789", LocalDate.of(1990, 1, 1), "john@example.com", "pass", null);
+        User user = new User(null, "", "Doe", "12345678", "+123456789", LocalDate.of(1990, 1, 1), "john@example.com", "pass", 1L, null);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> useCase.createCustomer(user));
 
-        assertTrue(exception.getErrors().stream().anyMatch(e -> e.getField().equals("firstname")));
+        assertTrue(exception.getErrors().stream().map(e -> (WithField) e).anyMatch(e -> e.getField().equals("firstname")));
     }
 
     @Test
     void shouldThrowValidationExceptionWhenPhoneNumberIsInvalid() {
-        User user = new User(null, "John", "Doe", "12345678", "abc123", LocalDate.of(1990, 1, 1), "john@example.com", "pass", null);
+        User user = new User(null, "John", "Doe", "12345678", "abc123", LocalDate.of(1990, 1, 1), "john@example.com", "pass", 1L, null);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> useCase.createCustomer(user));
 
-        assertTrue(exception.getErrors().stream().anyMatch(e -> e.getField().equals("phoneNumber")));
+        assertTrue(exception.getErrors().stream().map(e -> (WithField) e).anyMatch(e -> e.getField().equals("phoneNumber")));
     }
 
     @Test
     void shouldThrowValidationExceptionWhenEmailIsInvalid() {
-        User user = new User(null, "John", "Doe", "12345678", "+123456789", LocalDate.of(1990, 1, 1), "invalid-email", "pass", null);
+        User user = new User(null, "John", "Doe", "12345678", "+123456789", LocalDate.of(1990, 1, 1), "invalid-email", "pass", 1L, null);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> useCase.createCustomer(user));
 
-        assertTrue(exception.getErrors().stream().anyMatch(e -> e.getField().equals("email")));
+        assertTrue(exception.getErrors().stream().map(e -> (WithField) e).anyMatch(e -> e.getField().equals("email")));
     }
 
     @Test
     void shouldThrowValidationExceptionWhenBirthdateIsMissing() {
-        User user = new User(null, "John", "Doe", "12345678", "+123456789", null, "john@example.com", "pass", null);
+        User user = new User(null, "John", "Doe", "12345678", "+123456789", null, "john@example.com", "pass", 1L, null);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> useCase.createCustomer(user));
 
-        assertTrue(exception.getErrors().stream().anyMatch(e -> e.getField().equals("birthdate")));
+        assertTrue(exception.getErrors().stream().map(e -> (WithField) e).anyMatch(e -> e.getField().equals("birthdate")));
     }
 
     @Test
     void shouldThrowValidationExceptionWhenBirthdateIsTooRecentForOwner() {
-        User user = new User(null, "John", "Doe", "12345678", "+123456789", LocalDate.now().minusYears(17), "john@example.com", "pass", null);
+        User user = new User(null, "John", "Doe", "12345678", "+123456789", LocalDate.now().minusYears(17), "john@example.com", "pass", 1L, null);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> useCase.createOwner(user));
 
-        assertTrue(exception.getErrors().stream().anyMatch(e -> e.getField().equals("birthdate")));
+        assertTrue(exception.getErrors().stream().map(e -> (WithField) e).anyMatch(e -> e.getField().equals("birthdate")));
     }
 }

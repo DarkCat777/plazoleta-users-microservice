@@ -41,6 +41,9 @@ public class JpaUserEntity {
     @Column(name = "clave")
     private String password;
 
+    @Column(name = "id_restaurante")
+    private Long restaurantId;
+
     @ManyToOne
     @JoinColumn(name = "id_role") // Aquí defines la columna específica
     private JpaRoleEntity role;

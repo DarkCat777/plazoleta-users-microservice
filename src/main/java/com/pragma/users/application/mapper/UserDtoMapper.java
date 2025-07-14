@@ -12,6 +12,7 @@ public interface UserDtoMapper {
 
     @Mapping(target = "id", ignore = true) // no viene del request
     @Mapping(target = "role", ignore = true) // se asigna en la capa de dominio
+    @Mapping(target = "restaurantId", ignore = true) // no viene en el request se asigna solo al empleado
     User toDomain(CreateUserCommand request);
 
     UserResponse toResponse(User domain);
