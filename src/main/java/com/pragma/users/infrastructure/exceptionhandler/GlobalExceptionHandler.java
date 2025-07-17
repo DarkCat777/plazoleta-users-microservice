@@ -2,6 +2,7 @@ package com.pragma.users.infrastructure.exceptionhandler;
 
 import com.pragma.users.application.dto.response.ErrorResponse;
 import com.pragma.users.application.dto.response.ValidationErrorResponse;
+import com.pragma.users.domain.exception.RestaurantNotFoundException;
 import com.pragma.users.domain.exception.RoleNotFoundException;
 import com.pragma.users.domain.exception.UserAlreadyExistsException;
 import com.pragma.users.domain.exception.UserNotFoundException;
@@ -36,6 +37,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUserNotFound(
             UserNotFoundException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, "Usuario no encontrado", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRestaurantNotFound(
+            RestaurantNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Restaurante no encontrado", ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

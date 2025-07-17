@@ -71,7 +71,7 @@ public class UserUseCaseImpl implements UserUseCase {
                 .orElseThrow(() -> new RoleNotFoundException(RoleName.EMPLOYEE.name()));
 
         Restaurant restaurant = restaurantClientPort.findByOwner()
-                .orElseThrow(() -> new RestaurantNotFoundException("El propietario no tiene un restaurante."));
+                .orElseThrow(() -> new RestaurantNotFoundException("El propietario no tiene un restaurante asignado."));
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(role);
